@@ -15,12 +15,26 @@ private let globalTimerQueue = dispatch_queue_create("com.buckleyisms.Timer", DI
 
 private var runningTimers = Set<Timer>()
 
+/// This enum represents the current state of a timer. There are three possible states.
+///
+/// - Stopped: The timer is currently stopped. The timer may transition to the Running state.
+/// - Running: The timer is currently running. The timer may transition to the Paused and Stopped states.
+/// - Paused: The timer is currently paused. The timer may transition to the Running and Stopped states.
 public enum TimerState
 {
+    /// The timer is currently stopped. The timer may transition to the Running state.
     case Stopped
+    /// The timer is currently running. The timer may transition to the Paused and Stopped states.
     case Running
+    /// The timer is currently paused. The timer may transition to the Running and Stopped states.
     case Paused
 }
+
+/// This class implements a timer using GCD timer dispatch sources. It can be used from any thread, and allows the user
+/// To specify which queue the timer will execute the completion handler on.
+///
+/// Users do not need to keep strong references to the timers they create. Timers will not be deallocated until they
+/// have been stopped. Timers are passed into completion handlers so that users may stop them from within the handler.
 
 public class Timer : Hashable
 {
@@ -42,6 +56,8 @@ public class Timer : Hashable
         }
     }
 
+    /// The current state of the timer. The timer begins in the Stopped state.
+
     public var state: TimerState
     {
         get
@@ -57,6 +73,17 @@ public class Timer : Hashable
         }
     }
 
+    /// Initializes a timer, but does not start it.
+    ///
+    /// This initializer will fail if the interval is greater than INT64_MAX (9223372036854775807) nanoseconds
+    ///
+    /// :param: nanoseconds The timer's interval in nanoseconds.
+    /// :param: repeat The number of times the timer will fire. Passing 0 will cause the timer to fire just once,
+    ///                and passing a negative number will cause the timer to repeatedly fire until explicitly stopped.
+    /// :param: queue The queue on which to run the completion handler when the timer fires
+    /// :param: completion A closure to run each time the timer fires. This timer is passed in as the closure's single
+    ///                    parameter so that the timer may be stopped or paused from within the closure.
+
     public init?(nanoseconds: UInt64, repeat: Int64, queue: dispatch_queue_t, _ completion: (Timer) -> ())
     {
         self.interval = nanoseconds
@@ -70,10 +97,32 @@ public class Timer : Hashable
         }
     }
 
+    /// Initializes a timer, but does not start it.
+    ///
+    /// This initializer will fail if the interval is greater than 9223372036854 milliseconds
+    ///
+    /// :param: milliseconds The timer's interval in milliseconds.
+    /// :param: repeat The number of times the timer will fire. Passing 0 will cause the timer to fire just once,
+    ///                and passing a negative number will cause the timer to repeatedly fire until explicitly stopped.
+    /// :param: queue The queue on which to run the completion handler when the timer fires
+    /// :param: completion A closure to run each time the timer fires. This timer is passed in as the closure's single
+    ///                    parameter so that the timer may be stopped or paused from within the closure.
+
     public convenience init?(milliseconds: UInt64, repeat: Int64, queue: dispatch_queue_t, _ completion: (Timer) -> ())
     {
         self.init(nanoseconds: milliseconds * nanosecondsPerMillisecond, repeat: repeat, queue: queue, completion)
     }
+
+    /// Initializes a timer, but does not start it.
+    ///
+    /// This initializer will fail if the interval is greater than 9223372036 seconds
+    ///
+    /// :param: seconds The timer's interval in seconds.
+    /// :param: repeat The number of times the timer will fire. Passing 0 will cause the timer to fire just once,
+    ///                and passing a negative number will cause the timer to repeatedly fire until explicitly stopped.
+    /// :param: queue The queue on which to run the completion handler when the timer fires
+    /// :param: completion A closure to run each time the timer fires. This timer is passed in as the closure's single
+    ///                    parameter so that the timer may be stopped or paused from within the closure.
 
     public convenience init?(seconds: UInt64, repeat: Int64, queue: dispatch_queue_t, _ completion: (Timer) -> ())
     {
@@ -84,6 +133,13 @@ public class Timer : Hashable
     {
         cancel()
     }
+
+    /// Starts the timer.
+    ///
+    /// If the timer is paused, this method will resume the timer from where it was paused. if the timer is already
+    /// running, this method does nothing.
+    ///
+    /// :returns: true if called when the timer is stopped or paused, false if called when the timer is already running
 
     public func start() -> Bool
     {
@@ -143,6 +199,13 @@ public class Timer : Hashable
         return started
     }
 
+    /// Stops the timer.
+    ///
+    /// This method resets the timer, even if it is paused.
+    ///
+    /// If this method is called while the timer is in the process of firing, the timer will not stop until after it has
+    /// fired.
+
     public func stop()
     {
         dispatch_sync(globalTimerQueue,
@@ -151,6 +214,15 @@ public class Timer : Hashable
             self.reset()
         })
     }
+
+    /// Pauses the timer.
+    ///
+    /// This method does nothing if the timer is stopped or paused
+    ///
+    /// If this method is called while the timer is in the process of firing, the timer will not pause until after it
+    /// has fired.
+    ///
+    /// :returns: true if the timer was running when this method was called, false otherwise
 
     public func pause() -> Bool
     {
