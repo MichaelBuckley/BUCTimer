@@ -65,7 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				3038530D1AEB16BE000750EC /* BUCTimer */,
-				3038531A1AEB16BF000750EC /* TimerTests */,
+				3038531A1AEB16BF000750EC /* BUCTimerTests */,
 				3038530C1AEB16BE000750EC /* Products */,
 			);
 			sourceTree = "<group>";
@@ -99,12 +99,13 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		3038531A1AEB16BF000750EC /* TimerTests */ = {
+		3038531A1AEB16BF000750EC /* BUCTimerTests */ = {
 			isa = PBXGroup;
 			children = (
 				303853291AEB61A3000750EC /* TimerTests.swift */,
 				3038531B1AEB16BF000750EC /* Supporting Files */,
 			);
+			name = BUCTimerTests;
 			path = TimerTests;
 			sourceTree = "<group>";
 		};
