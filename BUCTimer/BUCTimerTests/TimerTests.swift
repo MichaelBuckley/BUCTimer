@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import Timer
+import BUCTimer
 
 class TimerTests: XCTestCase {
 
