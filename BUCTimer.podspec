@@ -17,10 +17,11 @@ Pod::Spec.new do |s|
 
   s.name         = "BUCTimer"
   s.version      = "1.0.0"
-  s.summary      = ""
+  s.summary      = "A native swift timer based on GCD."
 
   s.description  = <<-DESC
-                   A native swift timer based on GCD.
+                   A native swift timer based on GCD. Supports timers on any thread,
+                   targeting any queue. Timers can be paused, stopped and restarted.
                    DESC
 
   s.homepage     = "https://github.com/MichaelBuckley/BUCTimer"
@@ -64,7 +65,7 @@ Pod::Spec.new do |s|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  s.source       = { :git => "https://github.com/MichaelBuckley/BUCTimer.git", :tag => "v#{s.version}" }
+  s.source       = { :git => "https://github.com/MichaelBuckley/BUCTimer.git", :tag => "#{s.version}" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -75,7 +76,7 @@ Pod::Spec.new do |s|
   #  Not including the public_header_files will make all headers public.
   #
 
-  s.source_files  = "BUCTimer/**/*.{h,swift}"
+  s.source_files  = "BUCTimer/BUCTimer/**/*.{h,swift}"
 
   s.requires_arc = true
 
