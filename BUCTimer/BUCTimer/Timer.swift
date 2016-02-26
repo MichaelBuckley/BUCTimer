@@ -65,8 +65,8 @@ public class Timer : Hashable
             var stateToReturn = TimerState.Stopped
 
             dispatch_sync(globalTimerQueue,
-            {
-                stateToReturn = self._state
+                {
+                    stateToReturn = self._state
             })
 
             return stateToReturn
@@ -77,17 +77,17 @@ public class Timer : Hashable
     ///
     /// This initializer will fail if the interval is greater than INT64_MAX (9223372036854775807) nanoseconds
     ///
-    /// :param: nanoseconds The timer's interval in nanoseconds.
-    /// :param: repeat The number of times the timer will fire. Passing 0 will cause the timer to fire just once,
-    ///                and passing a negative number will cause the timer to repeatedly fire until explicitly stopped.
-    /// :param: queue The queue on which to run the completion handler when the timer fires
-    /// :param: completion A closure to run each time the timer fires. This timer is passed in as the closure's single
-    ///                    parameter so that the timer may be stopped or paused from within the closure.
+    /// - parameter nanoseconds: The timer's interval in nanoseconds.
+    /// - parameter repeats: The number of times the timer will fire. Passing 0 will cause the timer to fire just once,
+    /// and passing a negative number will cause the timer to repeatedly fire until explicitly stopped.
+    /// - parameter queue: The queue on which to run the completion handler when the timer fires
+    /// - parameter completion: A closure to run each time the timer fires. This timer is passed in as the closure's single
+    /// parameter so that the timer may be stopped or paused from within the closure.
 
-    public init?(nanoseconds: UInt64, repeat: Int64, queue: dispatch_queue_t, _ completion: (Timer) -> ())
+    public init?(nanoseconds: UInt64, repeats: Int64, queue: dispatch_queue_t, _ completion: (Timer) -> ())
     {
         self.interval = nanoseconds
-        self.reptitions = repeat
+        self.reptitions = repeats
         self.queue = queue
         self.completion = completion
 
@@ -101,32 +101,32 @@ public class Timer : Hashable
     ///
     /// This initializer will fail if the interval is greater than 9223372036854 milliseconds
     ///
-    /// :param: milliseconds The timer's interval in milliseconds.
-    /// :param: repeat The number of times the timer will fire. Passing 0 will cause the timer to fire just once,
-    ///                and passing a negative number will cause the timer to repeatedly fire until explicitly stopped.
-    /// :param: queue The queue on which to run the completion handler when the timer fires
-    /// :param: completion A closure to run each time the timer fires. This timer is passed in as the closure's single
-    ///                    parameter so that the timer may be stopped or paused from within the closure.
+    /// - parameter milliseconds: The timer's interval in milliseconds.
+    /// - parameter repeats: The number of times the timer will fire. Passing 0 will cause the timer to fire just once,
+    /// and passing a negative number will cause the timer to repeatedly fire until explicitly stopped.
+    /// - parameter queue: The queue on which to run the completion handler when the timer fires
+    /// - parameter completion: A closure to run each time the timer fires. This timer is passed in as the closure's single
+    /// parameter so that the timer may be stopped or paused from within the closure.
 
-    public convenience init?(milliseconds: UInt64, repeat: Int64, queue: dispatch_queue_t, _ completion: (Timer) -> ())
+    public convenience init?(milliseconds: UInt64, repeats: Int64, queue: dispatch_queue_t, _ completion: (Timer) -> ())
     {
-        self.init(nanoseconds: milliseconds * nanosecondsPerMillisecond, repeat: repeat, queue: queue, completion)
+        self.init(nanoseconds: milliseconds * nanosecondsPerMillisecond, repeats: repeats, queue: queue, completion)
     }
 
     /// Initializes a timer, but does not start it.
     ///
     /// This initializer will fail if the interval is greater than 9223372036 seconds
     ///
-    /// :param: seconds The timer's interval in seconds.
-    /// :param: repeat The number of times the timer will fire. Passing 0 will cause the timer to fire just once,
-    ///                and passing a negative number will cause the timer to repeatedly fire until explicitly stopped.
-    /// :param: queue The queue on which to run the completion handler when the timer fires
-    /// :param: completion A closure to run each time the timer fires. This timer is passed in as the closure's single
-    ///                    parameter so that the timer may be stopped or paused from within the closure.
+    /// - parameter seconds: The timer's interval in seconds.
+    /// - parameter repeats: The number of times the timer will fire. Passing 0 will cause the timer to fire just once,
+    /// and passing a negative number will cause the timer to repeatedly fire until explicitly stopped.
+    /// - parameter queue: The queue on which to run the completion handler when the timer fires
+    /// - parameter completion: A closure to run each time the timer fires. This timer is passed in as the closure's single
+    /// parameter so that the timer may be stopped or paused from within the closure.
 
-    public convenience init?(seconds: UInt64, repeat: Int64, queue: dispatch_queue_t, _ completion: (Timer) -> ())
+    public convenience init?(seconds: UInt64, repeats: Int64, queue: dispatch_queue_t, _ completion: (Timer) -> ())
     {
-        self.init(nanoseconds: seconds * nanosecondsPerSecond, repeat: repeat, queue: queue, completion)
+        self.init(nanoseconds: seconds * nanosecondsPerSecond, repeats: repeats, queue: queue, completion)
     }
 
     deinit
@@ -139,61 +139,61 @@ public class Timer : Hashable
     /// If the timer is paused, this method will resume the timer from where it was paused. if the timer is already
     /// running, this method does nothing.
     ///
-    /// :returns: true if called when the timer is stopped or paused, false if called when the timer is already running
+    /// - returns: true if called when the timer is stopped or paused, false if called when the timer is already running
 
     public func start() -> Bool
     {
         var started = false
 
         dispatch_sync(globalTimerQueue,
-        {
-            if self._state != TimerState.Running
             {
-                var remaining = self.reptitions
-
-                self.timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, globalTimerQueue)
-
-                if let timer = self.timer
+                if self._state != TimerState.Running
                 {
-                    dispatch_source_set_timer(
-                        timer,
-                        dispatch_time(DISPATCH_TIME_NOW, Int64(self.interval) - self.pauseInterval),
-                        self.interval,
-                        0
-                    )
+                    var remaining = self.reptitions
 
-                    dispatch_source_set_event_handler(timer,
+                    self.timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, globalTimerQueue)
+
+                    if let timer = self.timer
                     {
-                        if self._state == TimerState.Running
-                        {
-                            if remaining > 0
+                        dispatch_source_set_timer(
+                            timer,
+                            dispatch_time(DISPATCH_TIME_NOW, Int64(self.interval) - self.pauseInterval),
+                            self.interval,
+                            0
+                        )
+
+                        dispatch_source_set_event_handler(timer,
                             {
-                                --remaining;
-                            }
+                                if self._state == TimerState.Running
+                                {
+                                    if remaining > 0
+                                    {
+                                        --remaining;
+                                    }
 
-                            if remaining == 0
-                            {
-                                self.cancel()
-                                self.reset()
-                            }
+                                    if remaining == 0
+                                    {
+                                        self.cancel()
+                                        self.reset()
+                                    }
 
-                            self.pauseInterval = 0
-                            self.timerStartedAt = NSDate()
+                                    self.pauseInterval = 0
+                                    self.timerStartedAt = NSDate()
 
-                            dispatch_async(self.queue, { self.completion(self) })
-                        }
-                    })
+                                    dispatch_async(self.queue, { self.completion(self)})
+                                }
+                        })
 
-                    runningTimers.insert(self)
+                        runningTimers.insert(self)
 
-                    self.timerStartedAt = NSDate()
+                        self.timerStartedAt = NSDate()
 
-                    self._state = TimerState.Running
-                    started = true
+                        self._state = TimerState.Running
+                        started = true
 
-                    dispatch_resume(timer)
+                        dispatch_resume(timer)
+                    }
                 }
-            }
         })
 
         return started
@@ -209,9 +209,9 @@ public class Timer : Hashable
     public func stop()
     {
         dispatch_sync(globalTimerQueue,
-        {
-            self.cancel()
-            self.reset()
+            {
+                self.cancel()
+                self.reset()
         })
     }
 
@@ -222,29 +222,29 @@ public class Timer : Hashable
     /// If this method is called while the timer is in the process of firing, the timer will not pause until after it
     /// has fired.
     ///
-    /// :returns: true if the timer was running when this method was called, false otherwise
+    /// - returns: true if the timer was running when this method was called, false otherwise
 
     public func pause() -> Bool
     {
         var paused = false
 
         dispatch_sync(globalTimerQueue,
-        {
-            if self._state == TimerState.Running
             {
-                if let timerStartedAt = self.timerStartedAt
+                if self._state == TimerState.Running
                 {
-                    var timeSinceStart = Int64(
-                        NSDate().timeIntervalSinceDate(timerStartedAt) * NSTimeInterval(nanosecondsPerSecond)
-                    )
+                    if let timerStartedAt = self.timerStartedAt
+                    {
+                        let timeSinceStart = Int64(
+                            NSDate().timeIntervalSinceDate(timerStartedAt) * NSTimeInterval(nanosecondsPerSecond)
+                        )
 
-                    self.pauseInterval += timeSinceStart
+                        self.pauseInterval += timeSinceStart
+                    }
+
+                    self.cancel()
+                    self._state = TimerState.Paused
+                    paused = true
                 }
-
-                self.cancel()
-                self._state = TimerState.Paused
-                paused = true
-            }
         })
 
         return paused
@@ -271,7 +271,7 @@ public class Timer : Hashable
     }
 }
 
-public func ==(lhs: Timer, rhs: Timer) -> Bool
+public func == (lhs: Timer, rhs: Timer) -> Bool
 {
     return lhs === rhs
 }

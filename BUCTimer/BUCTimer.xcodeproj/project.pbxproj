@@ -198,6 +198,8 @@
 		303853021AEB16BE000750EC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftMigration = 0720;
+				LastSwiftUpdateCheck = 0720;
 				LastUpgradeCheck = 0630;
 				ORGANIZATIONNAME = Buckleyisms;
 				TargetAttributes = {

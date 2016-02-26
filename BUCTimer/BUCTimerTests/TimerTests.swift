@@ -18,7 +18,7 @@ class TimerTests: XCTestCase {
         let timeStarted = NSDate()
         var timeFired: NSDate? = nil
 
-        let timer = Timer(milliseconds: 100, repeat: 0, queue: dispatch_get_main_queue(),
+        let timer = Timer(milliseconds: 100, repeats: 0, queue: dispatch_get_main_queue(),
         {
             timer in
 
@@ -48,7 +48,7 @@ class TimerTests: XCTestCase {
         var timesCalled = 0
         let expectation = self.expectationWithDescription("timer was called")
 
-        let timer = Timer(milliseconds: 200, repeat: 0, queue: dispatch_get_main_queue(),
+        let timer = Timer(milliseconds: 200, repeats: 0, queue: dispatch_get_main_queue(),
         {
             timer in
 
@@ -72,14 +72,14 @@ class TimerTests: XCTestCase {
         let expectation2 = self.expectationWithDescription("timer2 was called")
         let expectation3 = self.expectationWithDescription("timer3 was called")
 
-        let timer1 = Timer(milliseconds: 100, repeat: 0, queue: dispatch_get_main_queue(),
+        let timer1 = Timer(milliseconds: 100, repeats: 0, queue: dispatch_get_main_queue(),
         {
             timer in
 
             expectation1.fulfill()
         })
 
-        let timer2 = Timer(milliseconds: 150, repeat: 0, queue: dispatch_get_main_queue(),
+        let timer2 = Timer(milliseconds: 150, repeats: 0, queue: dispatch_get_main_queue(),
         {
             timer in
 
@@ -87,7 +87,7 @@ class TimerTests: XCTestCase {
             expectation2.fulfill()
         })
 
-        let timer3 = Timer(milliseconds: 200, repeat: 0, queue: dispatch_get_main_queue(),
+        let timer3 = Timer(milliseconds: 200,  repeats: 0, queue: dispatch_get_main_queue(),
         {
             timer in
 
@@ -116,7 +116,7 @@ class TimerTests: XCTestCase {
         var timesCalled = 0
         let expectation = self.expectationWithDescription("timer was called")
 
-        let timer = Timer(milliseconds: 100, repeat: 3, queue: dispatch_get_main_queue(),
+        let timer = Timer(milliseconds: 100, repeats: 3, queue: dispatch_get_main_queue(),
         {
             timer in
 
@@ -142,7 +142,7 @@ class TimerTests: XCTestCase {
         var timesCalled = 0
         let expectation = self.expectationWithDescription("timer was called")
 
-        let timer = Timer(milliseconds: 100, repeat: -1, queue: dispatch_get_main_queue(),
+        let timer = Timer(milliseconds: 100, repeats: -1, queue: dispatch_get_main_queue(),
         {
             timer in
 
@@ -171,7 +171,7 @@ class TimerTests: XCTestCase {
         let timeStarted = NSDate()
         var timeFired: NSDate? = nil
 
-        let timer = Timer(seconds: 4, repeat: 0, queue: dispatch_get_main_queue(),
+        let timer = Timer(seconds: 4, repeats: 0, queue: dispatch_get_main_queue(),
         {
             timer in
 
@@ -213,7 +213,7 @@ class TimerTests: XCTestCase {
     {
         var timesCalled = 0;
 
-        let timer = Timer(seconds: 1, repeat: 0, queue: dispatch_get_main_queue(),
+        let timer = Timer(seconds: 1, repeats: 0, queue: dispatch_get_main_queue(),
         {
             timer in
 
@@ -238,7 +238,7 @@ class TimerTests: XCTestCase {
         var timesCalled = 0
         let expectation = self.expectationWithDescription("timer was called")
 
-        let timer = Timer(seconds: 1, repeat: 0, queue: dispatch_get_main_queue(),
+        let timer = Timer(seconds: 1, repeats: 0, queue: dispatch_get_main_queue(),
         {
             timer in
 
