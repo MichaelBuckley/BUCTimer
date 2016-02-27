@@ -9,7 +9,7 @@ BUCTimer is a native Swift timer based on GCD. Timers can be scheduled from any 
 
 Carthage is the recommended way to install BUCTimer. Start by adding the following line to your [Cartfile](https://github.com/Carthage/Carthage/blob/master/Documentation/Artifacts.md#cartfile).
 ```
-github "MichaelBuckley/BUCTimer" ~> 1.0
+github "MichaelBuckley/BUCTimer" ~> 2.0
 ```
 
 Full instructions on installing dependencies with Carthage can be found in [Carthage's README](https://github.com/Carthage/Carthage#adding-frameworks-to-an-application).
@@ -19,7 +19,7 @@ Full instructions on installing dependencies with Carthage can be found in [Cart
 Add the following line to your Podfile(http://guides.cocoapods.org/using/the-podfile.html).
 
 ```ruby
-pod 'BUCTimer', '~> 1.0'
+pod 'BUCTimer', '~> 2.0'
 ```
 Then, run `pod update`.
 
