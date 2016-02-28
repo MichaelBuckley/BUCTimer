@@ -30,7 +30,7 @@ Using BUCTimer is simple. Create a timer object and call `start()`.
 ```Swift
 import BUCTimer
 
-let timer = Timer(milliseconds: 100, repeat: 0, queue: dispatch_get_main_queue(),
+let timer = Timer(milliseconds: 100, repeats: 0, queue: dispatch_get_main_queue(),
 {
     timer in
 
@@ -42,12 +42,12 @@ timer?.start()
 
 There are also initializers that allow you to specify the interval in seconds and nanoseconds. The initializer will fail if the interval is greater than 292 years.
 
-If you specify 0 or 1 for the repeat parameter, the timer will only fire once before stopping. If you specify a greater number, the timer will fire that many times before stoping. If you specify a negative number, the timer will repeat indefinitely until paused or stopped. Because of this, the timer is passed into your completion handler as a parameter so that you can stop the timer once you no longer need it.
+If you specify 0 or 1 for the repeats parameter, the timer will only fire once before stopping. If you specify a greater number, the timer will fire that many times before stoping. If you specify a negative number, the timer will repeat indefinitely until paused or stopped. Because of this, the timer is passed into your completion handler as a parameter so that you can stop the timer once you no longer need it.
 
 ```Swift
 import BUCTimer
 
-let timer = Timer(milliseconds: 100, repeat: -1, queue: dispatch_get_main_queue(),
+let timer = Timer(milliseconds: 100, repeats: -1, queue: dispatch_get_main_queue(),
 {
     timer in
 
