@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "BUCTimer"
-  s.version      = "2.0.0"
+  s.version      = "3.0.0"
   s.summary      = "A native swift timer based on GCD."
 
   s.description  = <<-DESC

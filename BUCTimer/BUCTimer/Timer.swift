@@ -11,7 +11,7 @@ import Foundation
 private let nanosecondsPerMillisecond: UInt64 = 1000000
 private let nanosecondsPerSecond: UInt64 = 1000000000
 
-private let globalTimerQueue = dispatch_queue_create("com.buckleyisms.Timer", DISPATCH_QUEUE_SERIAL)
+private let globalTimerQueue = DispatchQueue(label: "com.buckleyisms.Timer")
 
 private var runningTimers = Set<Timer>()
 
@@ -37,14 +37,14 @@ public enum TimerState {
 /// have been stopped. Timers are passed into completion handlers so that users may stop them from within the handler.
 
 public class Timer : Hashable {
-    private var timer: dispatch_source_t? = nil
+    private var timer: DispatchSourceTimer? = nil
     private let interval: UInt64
     private let reptitions: Int64
-    private let queue: dispatch_queue_t
+    private let queue: DispatchQueue
     private let completion: (Timer) -> ()
 
     private var _state: TimerState = TimerState.Stopped
-    private var timerStartedAt: NSDate? = nil
+    private var timerStartedAt: Date? = nil
     private var pauseInterval: Int64 = 0
 
     public var hashValue: Int {
@@ -59,9 +59,9 @@ public class Timer : Hashable {
         get {
             var stateToReturn = TimerState.Stopped
 
-            dispatch_sync(globalTimerQueue, {
+            globalTimerQueue.sync {
                 stateToReturn = self._state
-            })
+            }
 
             return stateToReturn
         }
@@ -78,7 +78,7 @@ public class Timer : Hashable {
     /// - parameter completion: A closure to run each time the timer fires. This timer is passed in as the closure's single
     /// parameter so that the timer may be stopped or paused from within the closure.
 
-    public init?(nanoseconds: UInt64, repeats: Int64, queue: dispatch_queue_t, _ completion: (Timer) -> ()) {
+    public init?(nanoseconds: UInt64, repeats: Int64, queue: DispatchQueue, _ completion: @escaping (Timer) -> ()) {
         self.interval = nanoseconds
         self.reptitions = repeats
         self.queue = queue
@@ -100,7 +100,7 @@ public class Timer : Hashable {
     /// - parameter completion: A closure to run each time the timer fires. This timer is passed in as the closure's single
     /// parameter so that the timer may be stopped or paused from within the closure.
 
-    public convenience init?(milliseconds: UInt64, repeats: Int64, queue: dispatch_queue_t, _ completion: (Timer) -> ()) {
+    public convenience init?(milliseconds: UInt64, repeats: Int64, queue: DispatchQueue, _ completion: @escaping (Timer) -> ()) {
         self.init(nanoseconds: milliseconds * nanosecondsPerMillisecond, repeats: repeats, queue: queue, completion)
     }
 
@@ -115,7 +115,7 @@ public class Timer : Hashable {
     /// - parameter completion: A closure to run each time the timer fires. This timer is passed in as the closure's single
     /// parameter so that the timer may be stopped or paused from within the closure.
 
-    public convenience init?(seconds: UInt64, repeats: Int64, queue: dispatch_queue_t, _ completion: (Timer) -> ()) {
+    public convenience init?(seconds: UInt64, repeats: Int64, queue: DispatchQueue, _ completion: @escaping (Timer) -> ()) {
         self.init(nanoseconds: seconds * nanosecondsPerSecond, repeats: repeats, queue: queue, completion)
     }
 
@@ -133,24 +133,20 @@ public class Timer : Hashable {
     public func start() -> Bool {
         var started = false
 
-        dispatch_sync(globalTimerQueue, {
+        globalTimerQueue.sync {
             if self._state != TimerState.Running {
                 var remaining = self.reptitions
 
-                self.timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, globalTimerQueue)
+                self.timer = DispatchSource.makeTimerSource(queue: globalTimerQueue)
 
                 if let timer = self.timer {
-                    dispatch_source_set_timer(
-                        timer,
-                        dispatch_time(DISPATCH_TIME_NOW, Int64(self.interval) - self.pauseInterval),
-                        self.interval,
-                        0
-                    )
+                    timer.schedule(deadline: .now() + .nanoseconds(Int(self.interval) - Int(self.pauseInterval)),
+                                   repeating: .nanoseconds(Int(self.interval)))
 
-                    dispatch_source_set_event_handler(timer, {
+                    timer.setEventHandler(handler: {
                         if self._state == TimerState.Running {
                             if remaining > 0 {
-                                --remaining;
+                                remaining -= 1
                             }
 
                             if remaining == 0 {
@@ -159,23 +155,25 @@ public class Timer : Hashable {
                             }
 
                             self.pauseInterval = 0
-                            self.timerStartedAt = NSDate()
+                            self.timerStartedAt = Date()
 
-                            dispatch_async(self.queue, { self.completion(self)})
+                            self.queue.async {
+                                self.completion(self)
+                            }
                         }
                     })
 
                     runningTimers.insert(self)
 
-                    self.timerStartedAt = NSDate()
+                    self.timerStartedAt = Date()
 
                     self._state = TimerState.Running
                     started = true
 
-                    dispatch_resume(timer)
+                    timer.resume()
                 }
             }
-        })
+        }
 
         return started
     }
@@ -188,10 +186,10 @@ public class Timer : Hashable {
     /// fired.
 
     public func stop() {
-        dispatch_sync(globalTimerQueue, {
+        globalTimerQueue.sync {
             self.cancel()
             self.reset()
-        })
+        }
     }
 
     /// Pauses the timer.
@@ -206,11 +204,11 @@ public class Timer : Hashable {
     public func pause() -> Bool {
         var paused = false
 
-        dispatch_sync(globalTimerQueue, {
+        globalTimerQueue.sync {
             if self._state == TimerState.Running {
                 if let timerStartedAt = self.timerStartedAt {
                     let timeSinceStart = Int64(
-                        NSDate().timeIntervalSinceDate(timerStartedAt) * NSTimeInterval(nanosecondsPerSecond)
+                        NSDate().timeIntervalSince(timerStartedAt) * TimeInterval(nanosecondsPerSecond)
                     )
 
                     self.pauseInterval += timeSinceStart
@@ -220,7 +218,7 @@ public class Timer : Hashable {
                 self._state = TimerState.Paused
                 paused = true
             }
-        })
+        }
 
         return paused
     }
@@ -228,7 +226,7 @@ public class Timer : Hashable {
     private func cancel() {
         if self._state == TimerState.Running {
             if let timer = self.timer {
-                dispatch_source_cancel(timer)
+                timer.cancel()
             }
 
             runningTimers.remove(self)

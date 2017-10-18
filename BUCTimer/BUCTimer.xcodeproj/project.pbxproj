@@ -87,8 +87,7 @@
 				303853271AEB1722000750EC /* Timer.swift */,
 				3038530E1AEB16BE000750EC /* Supporting Files */,
 			);
-			name = BUCTimer;
-			path = Timer;
+			path = BUCTimer;
 			sourceTree = "<group>";
 		};
 		3038530E1AEB16BE000750EC /* Supporting Files */ = {
@@ -105,8 +104,7 @@
 				303853291AEB61A3000750EC /* TimerTests.swift */,
 				3038531B1AEB16BF000750EC /* Supporting Files */,
 			);
-			name = BUCTimerTests;
-			path = TimerTests;
+			path = BUCTimerTests;
 			sourceTree = "<group>";
 		};
 		3038531B1AEB16BF000750EC /* Supporting Files */ = {
@@ -380,6 +378,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				SWIFT_VERSION = 4.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -418,6 +417,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
+				SWIFT_VERSION = 4.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
